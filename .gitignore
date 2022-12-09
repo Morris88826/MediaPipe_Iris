@@ -1,4 +1,6 @@
-data
+data/iris_landmark.pth
+data/weights.pkl
+
 demo
 results
 
