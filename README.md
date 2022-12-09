@@ -35,3 +35,27 @@ More details:
 - [Paper](https://arxiv.org/pdf/2006.11341.pdf)
 
 ## Get Started
+
+### Setup the environment
+```
+git clone https://github.com/Morris88826/MediaPipe_Iris.git
+cd MediaPipe_Iris
+
+conda create --name mediapipe_iris python=3.7
+conda activate mediapipe_iris
+pip install -r requirements.txt
+```
+
+### Extract weights from tflite model
+Run extract_iris_landmark_model.py file to extract weights in the tflite model. The extracted weights will be stored in the data folder. One can verify the result by running libs/iris.py. This will save the checkpoint file in pytorch format(.pth) if not yet created in the data folder.
+
+```
+python extract_iris_landmark_model.py 
+python libs/iris.py
+```
+
+### Test the result
+```
+python main.py # this will run the demo
+python main.py --source {path_to_the_video}
+```

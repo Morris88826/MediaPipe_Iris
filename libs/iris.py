@@ -157,7 +157,7 @@ class Conv2d_block_v2(nn.Module):
 
 
 class MediaPipeIris(nn.Module):
-    def __init__(self, ckpt_path="./data/weights.pkl", pretrained=False) -> None:
+    def __init__(self, pretrained=False, ckpt_path="./data/iris_landmark.pth", weights_path=None) -> None:
         super(MediaPipeIris, self).__init__()
 
         self.padding = nn.ZeroPad2d((0,2,0,2))
@@ -251,9 +251,10 @@ class MediaPipeIris(nn.Module):
 
 
         if pretrained: 
-            iris_landmark_ckpt = './data/iris_landmark.pth'
-            if not os.path.exists(iris_landmark_ckpt):
-                with open(ckpt_path, 'rb') as picklefile:
+            if weights_path is not None or not os.path.exists(ckpt_path):
+                if weights_path is None:
+                    weights_path = './data/weights.pkl'
+                with open(weights_path, 'rb') as picklefile:
                     d = pickle.load(picklefile)
                 self.Conv2D_0.weight = torch.nn.Parameter(torch.from_numpy(d['Conv2D_0_weight']))
                 self.Conv2D_0.bias = torch.nn.Parameter(torch.from_numpy(d['Conv2D_0_bias']))
@@ -366,12 +367,14 @@ class MediaPipeIris(nn.Module):
                 self.iris_Conv2D_out.weight = torch.nn.Parameter(torch.from_numpy(d['iris_Conv2D_out_weight']))
                 self.iris_Conv2D_out.bias = torch.nn.Parameter(torch.from_numpy(d['iris_Conv2D_out_bias']))
 
-                torch.save({
-                    "model_state_dict": self.state_dict()
-                }, iris_landmark_ckpt)
+                if not os.path.exists(ckpt_path):
+                    torch.save({
+                        "model_state_dict": self.state_dict()
+                    }, ckpt_path)
+                    print("Torch model saved ~")
             
             else:
-                self.load_state_dict(torch.load(iris_landmark_ckpt)["model_state_dict"])
+                self.load_state_dict(torch.load(ckpt_path)["model_state_dict"])
                 print("Loaded from checkpoint file ~")
             
     def forward(self, x):
@@ -457,10 +460,10 @@ def rel_error(x, y):
 
 if __name__ == "__main__":
 
-    with open("../data/weights.pkl", 'rb') as picklefile:
+    with open("./data/weights.pkl", 'rb') as picklefile:
         d = pickle.load(picklefile)
 
-    model = MediaPipeIris(pretrained=True, ckpt_path="../data/weights.pkl")
+    model = MediaPipeIris(pretrained=True, weights_path="./data/weights.pkl")
 
     eyeContour, iris = model(torch.from_numpy(d["input"]))
 
